@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 class AuthBloc extends Cubit<AuthState> {
   AuthBloc() : super(AuthState());
@@ -92,7 +93,7 @@ class AuthBloc extends Cubit<AuthState> {
   }
 }
 
-class AuthState {
+class AuthState extends Equatable{
   final String name;
   final String? nameError;
   final String email;
@@ -126,4 +127,7 @@ class AuthState {
       pincodeError: pincodeError,
     );
   }
+
+  @override
+  List<Object?> get props => [name, nameError, email, emailError, pincode, pincodeError];
 }

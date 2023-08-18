@@ -1,30 +1,101 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:bloc_test/bloc_test.dart';
+import 'package:create_account/auth_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:create_account/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('AuthBloc', () {
+    late AuthBloc authBloc;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    setUp(() {
+      authBloc = AuthBloc();
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    tearDown(() {
+      authBloc.close();
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    blocTest<AuthBloc, AuthState>(
+      'validateName emits correct state for valid name',
+      build: () => authBloc,
+      act: (bloc) => bloc.validateName('John'),
+      expect: () => [AuthState(name: 'John', nameError: null)],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validateName emits correct state for invalid name',
+      build: () => authBloc,
+      act: (bloc) => bloc.validateName('J0hn'), // Invalid due to numeric character
+      expect: () => [AuthState(name: 'J0hn', nameError: 'Invalid name')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validateName emits correct state for invalid name',
+      build: () => authBloc,
+      act: (bloc) => bloc.validateName('Jhon Surname'), // Invalid due to numeric character
+      expect: () => [AuthState(name: 'Jhon Surname', nameError: 'Invalid name')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validateEmail emits correct state for valid email',
+      build: () => authBloc,
+      act: (bloc) => bloc.validateEmail('test@example.com'),
+      expect: () => [AuthState(email: 'test@example.com')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validateEmail emits correct state for invalid email',
+      build: () => authBloc,
+      act: (bloc) => bloc.validateEmail('invalidemail'), // Invalid email format
+      expect: () => [AuthState(email: 'invalidemail', emailError: 'Invalid email')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for valid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('764823'),
+      expect: () => [AuthState(pincode: '764823',)],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for invalid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('315353'), // Consecutive repeated digits
+      expect: () => [AuthState(pincode: '315353', pincodeError: 'Invalid pincode')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for invalid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('222334'), // Consecutive repeated digits
+      expect: () => [AuthState(pincode: '222334', pincodeError: 'Invalid pincode')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for invalid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('111234'), // Consecutive repeated digits
+      expect: () => [AuthState(pincode: '111234', pincodeError: 'Invalid pincode')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for invalid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('234567'), // Consecutive repeated digits
+      expect: () => [AuthState(pincode: '234567', pincodeError: 'Invalid pincode')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for simple sequence',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('123456'), // Simple sequence
+      expect: () => [AuthState(pincode: '123456', pincodeError: 'Invalid pincode')],
+    );
+
+    blocTest<AuthBloc, AuthState>(
+      'validatePincode emits correct state for invalid pincode',
+      build: () => authBloc,
+      act: (bloc) => bloc.validatePincode('987654'), // Consecutive repeated digits
+      expect: () => [AuthState(pincode: '987654', pincodeError: 'Invalid pincode')],
+    );
   });
 }
